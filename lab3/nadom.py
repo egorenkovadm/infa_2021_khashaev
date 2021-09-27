@@ -8,93 +8,214 @@ pygame.init()
 
 screen = pygame.display.set_mode((600, 402))
 
-brown = (153, 51, 0)
-# Sand, water and air
-rect(screen, (255, 255, 0), (0, 275, 600, 127))
-rect(screen, (0, 0, 255), (0, 175, 600, 100))
-rect(screen, (0, 255, 255), (0, 0, 600, 175))
+#colors
+black = (0,0,0)
+sand_color = (255, 232, 173)
+water_color = (0, 0, 205)
+sun_color = (245, 235, 30)
+
+#Functions for drawing objects
+
 # Sun
-circle(screen, (255, 255, 0), (500, 75), 50)
-n = 7
-r = 60
-def triangle(a):
-    polygon(screen, (255, 255, 0),
-    [(500 + r * np.cos(2 * np.pi / n + a), 75 + r * np.sin(2 * np.pi / n + a)),
-    (500 + r * np.cos(2 * np.pi / n + a + 2 * np.pi / 3), 75 + r * np.sin(2 * np.pi / n + a + 2 * np.pi / 3)),
-    (500 + r * np.cos(2 * np.pi / n + a + 4 * np.pi / 3), 75 + r * np.sin(2 * np.pi / n + a + 4 * np.pi / 3)),
-    (500 + r * np.cos(2 * np.pi / n + a), 75 + r * np.sin(2 * np.pi / n + a))])
-    return None
-for i in range(n):
-    triangle(i * 2 * np.pi / 3 / n)
-#for i in range(n):
-#    line(screen, (255, 255, 0),
-#    (500 + r * np.cos(2 * np.pi / n * i), 75 + r * np.sin(2 * np.pi / n * i)),
-#    (500 + r * np.cos(2 * np.pi / n * (i + 1)), 75 + r * np.sin(2 * np.pi / n * (i + 1))), 4)
-#for i in range(n):
-#    line(screen, (255, 255, 0),
-#    (500 + r * np.cos(2 * np.pi / n * (i + 0.5)), 75 + r * np.sin(2 * np.pi / n * (i + 0.5))),
-#    (500 + r * np.cos(2 * np.pi / n * (i + 1.5)), 75 + r * np.sin(2 * np.pi / n * (i + 1.5))), 4)
-triangle(0)
-# Wave
-for i in range(7):
-    ellipse(screen, (255, 255, 0), ((i * 2) * 600 / 14, 265, 600 / 14, 20))
-    ellipse(screen, (0, 0, 255), ((i * 2 + 1) * 600 / 14, 265, 600 / 14, 20))
+def sun(x,y,n,r,sun_color):
+    '''
+    Function draws a sun - circle with n*3 rays
+    x,y - coordinates of center of circle
+    n*3 - number of rays
+    sun_color - color of sun
+    '''
+
+    circle(screen, sun_color, (x, y), 50)
+    
+    def triangle(a):
+        '''
+        Function draws a equilateral triangle
+        a - integer
+        '''
+        polygon(screen, sun_color,
+        [(x + r * np.cos(2 * np.pi / n + a),
+        y + r * np.sin(2 * np.pi / n + a)),
+        (x + r * np.cos(2 * np.pi / n + a + 2 * np.pi / 3),
+        y + r * np.sin(2 * np.pi / n + a + 2 * np.pi / 3)),
+        (x + r * np.cos(2 * np.pi / n + a + 4 * np.pi / 3),
+        y + r * np.sin(2 * np.pi / n + a + 4 * np.pi / 3))])
+
+    triangle(0)
+    for i in range(n):
+       triangle((i * 2 * np.pi / 3 / n))
+
+
+
 # Cloud
-def cloud(x, y, e, k):
+def cloud(surface, x, y, e, k, color_fill, color_border):
+    '''
+    Function draws a cloud of ellipses on the screen
+    surface - an object pygame.surface
+    x,y - coordinates of center of left border
+    e - radius * e = width of ellipse
+    k - r*k = radius of circle
+    color_fill - color of ellipses' fill
+    color_border - color of ellipses' border
+    '''
     r = 25 * k
     g = 0.8
     for i in range(4):
-        ellipse(screen, (255, 255, 255), [x + g * r * i, y - r, e * r, r], 0)
-        ellipse(screen, (0, 0, 0), [x + g * r * i, y - r, e * r, r], 1)
+        ellipse(surface, color_border, [x + g * r * i, y - r, e * r, r], 0)
+        ellipse(surface, color_fill, [x + g * r * i, y - r, e * r, r], 1)
     for i in range(3):
-        ellipse(screen, (255, 255, 255), [x + g * r * (i + 1 / 2), y - r / 2, e * r, r], 0)
-        ellipse(screen, (0, 0, 0), [x + g * r * (i + 1 / 2), y - r / 2, e * r, r], 1)    
-    return None
+        ellipse(surface, color_border, [x + g * r * (i + 1 / 2),
+                y - r / 2, e * r, r], 0)
+        ellipse(surface, color_fill, [x + g * r * (i + 1 / 2),
+                y - r / 2, e * r, r], 1)    
+
 # Umbrella
-def umbrella(x, y, k): #x, y - coordinates of left bottom corner of stick, k - scale
+def umbrella(surface,x, y, k,color_hat,color_stick,color_strip):  
+    '''
+    Function draws an umbrella
+    surface - an object pygame.surface
+    x,y - coordinates of left bottom corner of stick
+    k - scale
+    color_hat - color of umbrella's hat
+    color_stick - color of umbrella's stick
+    color_strip - color of strips on a hat
+    '''
     h = 150 * k #Heith of stick
     w = 8 * k #Width of stick
-    rect(screen, (153, 51, 0), (x, y - h, w, h))
+    stick(surface,h,w,x,y,color_stick)
+    umbrella_hat(surface,x,y,k,h,w,color_hat,color_strip)
+    
+def stick(surface,h,w,x,y,color_stick):
+    '''
+    Function draws a stick - high and thin rectangle
+    surface - an object pygame.surface
+    h - height of stick
+    w - width of stick
+    x,y - coordinates of left bottom corner of stick
+    k - scale
+    color_stick - color of stick
+    '''
+    rect(surface, color_stick, (x, y - h, w, h))
+
+def umbrella_hat(surface, x, y, k,h,w,color_hat,color_strip):
+    '''
+    Function draws an umbrella's hat - triangle with strips on it
+    surface - an object pygame.surface
+    x,y - coordinates of left bottom corner of stick
+    k - scale
+    h - height of stick
+    w - width of stick
+    color_hat - color of umbrella's hat
+    color_strip - color of hat's strip
+    '''
     wt = 70 * k #Width of hat
-    polygon(screen, (255, 0, 0), 
-    [(x - wt + w / 2, y - 5 * h / 6), (x + w / 2, y - h * 1.05), (x + wt + w / 2, y - 5 * h / 6), (x - wt + w / 2, y - 5 * h / 6)])
+    polygon(screen, color_hat, 
+            [(x - wt + w / 2, y - 5 * h / 6), (x + w / 2, y - h * 1.05),
+            (x + wt + w / 2, y - 5 * h / 6)])
     for i in range(8):
-        line(screen, (125, 40, 0), (x + w / 2, y - h * 1.05), (x - wt + w / 2 + i * wt * 2 / 8, y - 5 * h / 6))
-    return None
+       line(surface, color_strip, (x + w / 2, y - h * 1.05),
+            (x - wt + w / 2 + i * wt * 2 / 8, y - 5 * h / 6))
+
+
 # Ship
-def ship(x, y, k):
+def ship(surface, x, y, k, body_color, sail_color, window_color):
+    '''
+    Function draws a ship
+    x,y - coordinates of left corner of ship
+    k - scale
+    body_color - color of ship
+    sail_color - color of triangle sail
+    window_color - color of window
+    '''
     r = 25 * k #Radius of back
-    circle(screen, (153, 51, 0), (x + r, y - r), r)
-    rect(screen, (0, 0, 255), (x, y - 2 * r, 2 * r, r))
-    rect(screen, (0, 0, 255), (x + r, y - r, r, r))
-    w = 100 * k #Width of corpus
-    rect(screen, (153, 51, 00), (x + r, y - r, w, r))
-    line(screen, (0, 0, 0), (x + r, y - r), (x + r, y))
-    a = 60 * k #Lenth of corma
-    polygon(screen, brown, [(x + r + w, y - r), (x + r + w + a, y - r), (x + r + w, y), (x + r + w, y - r)])
-    line(screen, (0, 0, 0), (x + r + w, y - r), (x + r + w, y))
+    width_of_body = 100 * k
+    length_of_stern = 60 * k 
+    
+    ship_body(surface, x,y,k,r,width_of_body,length_of_stern,body_color)
+    
+    sail(surface, x,y,k,r,width_of_body,sail_color)
+
+    window(surface,x,y,r,width_of_body,window_color)
+
+def ship_body(surface,x,y,k,r,w,a,body_color):
+    '''
+    Function draws ship back
+    surface - an object pygame.surface
+    x,y - coordinates of left corner of ship
+    k - scale
+    r - radius of back
+    w - width of body
+    a - length of stern
+    body_color - color of ship body
+    '''
+    #back of ship
+    circle(surface, body_color, (x + r, y - r), r,draw_bottom_left=True) 
+    #center of ship 
+    rect(surface, body_color, (x + r, y - r, w, r)) 
+    line(surface, black, (x + r, y - r), (x + r, y))
+    #stern
+    polygon(surface, body_color, [(x + r + w, y - r), (x + r + w + a, y - r),
+            (x + r + w, y), (x + r + w, y - r)])
+    line(surface, black, (x + r + w, y - r),
+        (x + r + w, y))
+
+def sail(surface, x,y,k,r,width_of_body,sail_color):
+    '''
+    Function draws sail - two triangles and a stick
+    surface - an object pygame.surface
+    x,y - coordinates of left corner of ship
+    k - scale
+    r - radius of back
+    w - width of body
+    sail_color - color of sail
+    '''
+    #stick
     h = 90 * k #Heith of stick
     ws = 8 * k #Width of stick
-    rect(screen, (0, 0, 0), (x + r + w * 0.5, y - r - h, ws, h))
-    b = 60 * k #Width of parus
-    xp = x + r + w * 0.5 + ws # x coordinate of left upper corner of parus
-    polygon(screen, (200, 200, 200),
-    [(xp, y - r - h), (xp + b, y - r - h / 2), (xp, y - r), (xp + b * 0.3, y - r - h / 2), (xp, y - r - h)])
-    line(screen, (0, 0, 0), (xp + 0.3 *  b, y - r - h / 2), (xp + b, y - r - h / 2))
-    circle(screen, (0, 0, 0), (x + r + w + 0.5 * r, y - r * 0.55), r * 0.35)
-    circle(screen, (255, 255, 255), (x + r + w + 0.5 * r, y - r * 0.55), r * 0.2)
-    return None
+    stick(surface, h, ws, x + r + width_of_body * 0.5, y - r, black)
+    #sail
+    b = 60 * k #Width of sail
 
-ship(130, 210, 0.6)
-ship(350, 230, 1)
+    # x coordinate of left upper corner of sail
+    xp = x + r + width_of_body * 0.5 + ws
+    
+    polygon(surface, sail_color,
+            [(xp, y - r - h), (xp + b, y - r - h / 2), (xp, y - r),
+            (xp + b * 0.3, y - r - h / 2), (xp, y - r - h)])
+    line(surface, black, (xp + 0.3 *  b, y - r - h / 2),
+        (xp + b, y - r - h / 2))
 
-cloud(110, 50, 1, 1)
-cloud(230, 80, 1.1, 1.4)
-cloud(50, 130, 1.5, 1.3)
+def window(surface, x, y ,r, width_of_body,window_color):
+    circle(surface, black, (x + r + width_of_body + 0.5 * r, y - r * 0.55),
+           r * 0.35)
+    circle(surface, window_color, (x + r + width_of_body + 0.5 * r,
+                                   y - r * 0.55), r * 0.2)
+    
+#Drawing
+    
+#Sand, water and air
+rect(screen, sand_color, (0, 275, 600, 127))
+rect(screen, water_color, (0, 175, 600, 100))
+rect(screen, (135, 206, 250), (0, 0, 600, 175))
 
-umbrella(70, 340, 1)
-umbrella(200, 350, 0.8)
+# Wave
+for i in range(7):
+    ellipse(screen,  sand_color, ((i * 2) * 600 / 14, 265, 600 / 14, 20))
+    ellipse(screen, water_color, ((i * 2 + 1) * 600 / 14, 265, 600 / 14, 20))
 
+#Drawing objects
+sun(500, 75, 7, 60, sun_color)    
+
+ship(screen, 130, 210, 0.6,(153, 51, 0),(100,100,100),(255,255,255))
+ship(screen, 350, 230, 1,(153, 51, 0),(200,200,200),(255,255,255))
+
+cloud(screen, 110, 50, 1, 1,(112, 128, 144),(176, 196, 222))
+cloud(screen, 230, 80, 1.1, 1.4, black,(173, 216, 230))
+cloud(screen, 50, 130, 1.3, 1.5, black,(255, 255, 255))
+
+umbrella(screen, 70, 340, 1,(255,0,0),(153,51,0), black)
+umbrella(screen, 200, 350, 0.8,(255, 99, 71),(139, 69, 19),(0,0,128))
+
+#Updating display
 pygame.display.update()
 clock = pygame.time.Clock()
 finished = False
